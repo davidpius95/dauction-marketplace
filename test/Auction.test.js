@@ -7,7 +7,6 @@ describe("Dauction Marketplace", async () =>  {
   beforeEach(async () => {
 
     NFTContract = await ethers.getContractFactory('NFTContract');
-    // console.log(nftContract)
     nftContract = await NFTContract.deploy('AuctionNFT', 'ANFT');
     await nftContract.deployed();
     nftContractAddress = nftContract.address;
@@ -20,17 +19,11 @@ describe("Dauction Marketplace", async () =>  {
 
     [deployer, addr1, addr2] = await ethers.getSigners()
 
-
     const firstMintTxn = await nftContract.connect(deployer).mint(deployer.address, 1)
     await firstMintTxn.wait()
 
     console.log(`NFT deployed to : ${nftContractAddress}`)
     console.log(`Dauction Marketplace deployed to : ${auctionContractAddress}`)
-    
-    
-
-    // deployer = deployer.address
-    // addr1 = addr1.address
   })
 
   describe('Deployment', () => {
@@ -45,7 +38,6 @@ describe("Dauction Marketplace", async () =>  {
       const NFTOwner = await nftContract.ownerOf(1)
       assert.equal(deployer.address, NFTOwner)
       console.log(`deployer here: ${deployer.address}`)
-      
     });
   })
 
@@ -59,22 +51,30 @@ describe("Dauction Marketplace", async () =>  {
 
       console.log(`dauction contract address here: ${dauction.address}`)
 
-      const createAuctionTxn = await dauction.connect(deployer).createAuction(1, 5)
+      let timestamp = Math.floor(Date.now() / 1000)
+
+      const createAuctionTxn = await dauction.connect(deployer).createAuction(1, 5, timestamp)
       await createAuctionTxn.wait()     
 
       const auctionDetails = await dauction.auctions(nftContractAddress, 1)
-      const { seller, startDate, minBid, endDate, highestBidAddress, highestBidAmount } = auctionDetails
+      const { seller, startDate, minBidPrice, endDate, highestBidAddress, highestBidAmount, auctionStatus } = auctionDetails
 
+      const auctionState = await dauction.getAuctionStatus(nftContractAddress, 1)
+
+      console.log(`auction status: ${auctionState}`)
 
       console.log(`seller: ${seller}`)
       console.log(`start date: ${startDate}`)
-      console.log(`minbid: ${minBid}`)
+      console.log(`minbid: ${minBidPrice}`)
       console.log(`endDate: ${endDate}`)
       console.log(`highest bid address: ${highestBidAddress}`)
       console.log(`highest bid amount: ${highestBidAmount}`)
+      console.log(`auction status: ${auctionStatus}`)
 
       assert.equal(seller, deployer.address)
-      assert.equal(minBid, 5)
+      assert.equal(minBidPrice, 5)
+      assert.equal(auctionStatus, 1)
+      assert.equal(auctionState, auctionState)
     });
   })
 
