@@ -31,10 +31,11 @@ contract Dauction is ReentrancyGuard {
     uint256 biddedAt;
     BidStatus bidStatus;
   }
+  
+  uint256[] bidArray;
   uint256 bidCount;
   uint256 constant minUSDTBidAmount = 20;
   bytes32 hashedBid;
-  uint256[] bidArray;
 
   uint8 private nonce = 0;
   
@@ -91,10 +92,6 @@ contract Dauction is ReentrancyGuard {
     auction.highestBidAmount = 0;
     activeAuctions += 1;
 
-    // auction.bid.amountBidded = 0;
-    // auction.bid.biddedAt = 0;
-
-
     emit AuctionCreated({
       tokenId: _tokenId,
       seller: msg.sender,
@@ -133,23 +130,8 @@ contract Dauction is ReentrancyGuard {
 
 
     if(block.timestamp >= auction.endDate) {
-      decodehashedBidAmount(hashedBidAmount, _usdtBidAmount);
+      _decodehashedBidAmount(hashedBidAmount, _usdtBidAmount);
     }
-
-    
-
-
-    // hashBidAmount(account, amount, vrf);
-
-    
-
-    
-
-    // if()
-    //reimburse previous bidder
-    // auction.highestBidAddress.transfer(auction.highestBidAmount);
-    // auction.highestBidAddress = payable(msg.sender); 
-    // auction.highestBidAmount = msg.value;
   }
 
   function hashBidAmount(address account, uint256 amount, uint8 randomNum) public returns(bytes32) {
@@ -163,11 +145,11 @@ contract Dauction is ReentrancyGuard {
     if(nonce > 250) {
       nonce = 0;
     }
+    console.log('generated random no: %s', random);
     return random;
   }
 
-  function decodehashedBidAmount(bytes32 _hashedBid, uint256 _auctionEntryAmount) public returns(uint256) {
-    // bytes32 
+  function _decodehashedBidAmount(bytes32 _hashedBid, uint256 _auctionEntryAmount) private returns(uint256) {
     // 1. check if passed in value returns true when compared with keccak256 hash function
     require(keccak256(abi.encodePacked(_hashedBid)) == hashedBid, 'not corresponding hash');
 
@@ -178,14 +160,13 @@ contract Dauction is ReentrancyGuard {
     // 3. push the saved value into an array
     bidArray.push(auctionEntryAmount);
 
+    // 4. loop through array 
+    for(uint256 i = 0; i < bidArray.length; i++) {
+      console.log('iterated i: %s', i);
+      return bidArray[i];
+    } 
 
-      // 4. loop through array 
-      for(uint256 i = 0; i < bidArray.length; i++) {
-        console.log('iterated i: %s', i);
-        return bidArray[i];
-      } 
-      // 5. return iterated values based on asc. order
-
+    // 5. return iterated values based on asc. order
   }
 
 
@@ -205,6 +186,11 @@ contract Dauction is ReentrancyGuard {
     }
   }
 
+
+
+  /********************************************************************************************/
+  /*                                      UTILITY FUNCTIONS                                  */
+  /******************************************************************************************/
   function getMinBidPrice(address nftAddress, uint256 tokenId)  public view returns(uint256) {
     return auctions[nftAddress][tokenId].minBidPrice;
   }
@@ -223,6 +209,9 @@ contract Dauction is ReentrancyGuard {
       _auctionStatus = 'Unexecuted';
     } 
   }
+
+  // mapping(uint256 => mapping(address => Bid)) public bids;
+
   function getBidStatus(address nftAddress, uint256 tokenId) public view returns(string memory _auctionStatus) {
     uint8 bidState = uint8(auctions[nftAddress][tokenId].bids[tokenId].bidStatus);
     if(bidState == 0) {
@@ -241,9 +230,12 @@ contract Dauction is ReentrancyGuard {
     return auctions[nftAddress][tokenId].bids[tokenId].bidder;
   }
 
+
   function getBidHash(address nftAddress, uint256 tokenId) public view returns(bytes32) {
     return auctions[nftAddress][tokenId].bids[tokenId].bidHash;
   }
+
+
  
 }
 
