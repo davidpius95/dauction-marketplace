@@ -1,2 +1,2 @@
-# Decentralized Auction Marketplace (Dauction)
+# Decentralized Auction (Dauction) Marketplace 
 
