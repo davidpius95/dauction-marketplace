@@ -11,11 +11,4 @@ contract MockUSDT is Ownable, ERC20  {
     _mint(msg.sender, 200000000 * 10 ** 18);
     deployer = msg.sender;
   }
-
-  function burnToken(uint amount) external onlyOwner {
-    _burn(msg.sender, amount);
-
-  }
-
-
 }

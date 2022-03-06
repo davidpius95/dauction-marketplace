@@ -37,8 +37,7 @@ contract Dauction is ReentrancyGuard {
   uint256[] bidArray;
 
   uint8 private nonce = 0;
-
-
+  
    enum AuctionStatus { 
     Unassigned, 
     Initiated,
@@ -54,7 +53,6 @@ contract Dauction is ReentrancyGuard {
     address payable highestBidAddress;
     uint highestBidAmount;
     AuctionStatus auctionStatus;
-    // Bid bid;
     mapping(uint256 => Bid) bids;
   }
 
@@ -243,5 +241,9 @@ contract Dauction is ReentrancyGuard {
     return auctions[nftAddress][tokenId].bids[tokenId].bidder;
   }
 
+  function getBidHash(address nftAddress, uint256 tokenId) public view returns(bytes32) {
+    return auctions[nftAddress][tokenId].bids[tokenId].bidHash;
+  }
+ 
 }
 
